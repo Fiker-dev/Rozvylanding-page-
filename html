@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Goat Meat | Order Now</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <div class="brand">
+        <div class="brand__mark">R</div>
+        <div class="brand__text">
+          <div class="brand__name">Rozvy Estates</div>
+          <div class="brand__sub">Goat Meat • Fresh • Delivered</div>
+        </div>
+      </div>
+
+      <button class="cartBtn" id="openCartBtn" aria-label="Open cart">
+        Cart <span class="pill" id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero__left">
+        <h1>Order fresh goat meat in minutes.</h1>
+        <p class="muted">
+          Choose your cut, select kilograms, add to cart, and checkout.
+          Mobile-first, perfect for social media traffic.
+        </p>
+
+        <div class="hero__trust">
+          <div class="trustItem">Same-day / next-day delivery (area dependent)</div>
+          <div class="trustItem">Secure checkout</div>
+          <div class="trustItem">WhatsApp support</div>
+        </div>
+
+        <div class="hero__ctaRow">
+          <a class="btn btnPrimary" href="#products">Shop now</a>
+          <a class="btn btnGhost" id="whatsappBtn" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+      </div>
+
+      <div class="hero__right">
+        <div class="heroCard">
+          <img
+            class="heroImg"
+            src="https://images.unsplash.com/photo-1604908554162-12f2e7b8c1a2?auto=format&fit=crop&w=1200&q=70"
+            alt="Goat meat"
+          />
+          <div class="heroCard__footer">
+            <div>
+              <div class="tiny muted">Starting from</div>
+              <div class="priceBig" id="startingPrice">R 0</div>
+            </div>
+            <div class="tiny muted">Select KG → Add to cart → Checkout</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="products" class="section">
+      <div class="section__head">
+        <h2>Products</h2>
+        <p class="muted">Pick a product, select kilograms, then add to cart.</p>
+      </div>
+
+      <div class="grid" id="productGrid"></div>
+    </section>
+
+    <section class="section fineprint">
+      <h3>How it works</h3>
+      <ol class="steps">
+        <li>Choose a product</li>
+        <li>Select kilograms (KG)</li>
+        <li>Add to cart</li>
+        <li>Checkout securely</li>
+      </ol>
+      <p class="muted tiny">
+        Note: Pricing, delivery rules, and payment verification can be adjusted to match your exact business process.
+      </p>
+    </section>
+  </main>
+
+  <!-- CART DRAWER -->
+  <aside class="drawer" id="cartDrawer" aria-hidden="true">
+    <div class="drawer__overlay" id="closeCartOverlay"></div>
+    <div class="drawer__panel" role="dialog" aria-modal="true" aria-label="Cart">
+      <div class="drawer__head">
+        <div>
+          <div class="drawer__title">Your Cart</div>
+          <div class="muted tiny" id="cartMeta">0 items</div>
+        </div>
+        <button class="iconBtn" id="closeCartBtn" aria-label="Close cart">✕</button>
+      </div>
+
+      <div class="drawer__body" id="cartItems"></div>
+
+      <div class="drawer__footer">
+        <div class="totals">
+          <div class="row">
+            <span class="muted">Subtotal</span>
+            <span id="subtotal">R 0</span>
+          </div>
+          <div class="row">
+            <span class="muted">Delivery</span>
+            <span id="deliveryFee">R 0</span>
+          </div>
+          <div class="row total">
+            <span>Total</span>
+            <span id="total">R 0</span>
+          </div>
+        </div>
+
+        <button class="btn btnPrimary full" id="checkoutBtn">Checkout</button>
+        <button class="btn btnGhost full" id="clearCartBtn">Clear cart</button>
+
+        <p class="tiny muted">
+          Checkout is routed through a secure serverless endpoint (recommended).
+          If you want “pure GitHub Pages only”, we can do a redirect-style checkout, but it’s more limited.
+        </p>
+      </div>
+    </div>
+  </aside>
+
+  <script src="./app.js"></script>
+</body>
+</html>
