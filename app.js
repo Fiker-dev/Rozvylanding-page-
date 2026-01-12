@@ -1,3 +1,4 @@
+console.log("APP JS LOADED");
 // ✅ IMPORTANT: Your images now live in /assets/ (folder)
 // So each product image uses: "assets/<filename>.jpg"
 
