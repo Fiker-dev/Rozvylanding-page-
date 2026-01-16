@@ -2,90 +2,75 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rozvy Estates | Order Fresh From the Farm</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rozvy Estates – Farm Fresh</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
-  <!-- Clean header (less congested on mobile) -->
-  <header class="site-header">
-    <div class="logo-wrap">
-      <img src="assets/rozvy-logo.png" alt="Rozvy Estates" class="site-logo" />
-      <div class="brand-text">
-        <div class="brand-name">Rozvy Estates</div>
-        <div class="tagline">Farm Fresh • Direct to You</div>
-      </div>
-    </div>
 
-    <div class="header-actions">
-      <button class="cart-toggle" type="button" aria-label="Open cart">
-        Cart <span id="cart-count">0</span>
-      </button>
+<header class="site-header">
+  <div class="brand">
+    <img src="assets/rozvy-logo.png" class="site-logo" alt="Rozvy Estates" />
+    <div>
+      <h1>Rozvy Estates</h1>
+      <p>Farm Fresh • Direct to You</p>
     </div>
-  </header>
+  </div>
 
+  <div class="header-actions">
+    <a
+      href="https://wa.me/27769126465?text=Hi%20Rozvy%20Estates%2C%20I%27d%20like%20to%20place%20a%20custom%20order."
+      class="whatsapp-btn"
+      target="_blank"
+    >
+      WhatsApp us for a custom order
+    </a>
+
+    <button class="cart-btn" onclick="toggleCart()">
+      Cart <span id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<main>
   <section class="hero">
-    <h1>Order Fresh From the Farm</h1>
+    <h2>Order Fresh From the Farm</h2>
     <p>Select quantities, add to cart, then checkout.</p>
     <div class="tip">
       Tip: Use the kg selector for meat/fish. Eggs & honey are sold per unit.
     </div>
   </section>
 
-  <main class="products" id="product-list"></main>
+  <section class="products" id="products"></section>
+</main>
 
-  <!-- Floating WhatsApp (better mobile UX) -->
-  <a
-    class="wa-float"
-    href="https://wa.me/27827649996?text=Hi%20Rozvy%20Estates%2C%20I%27d%20like%20to%20place%20a%20custom%20order."
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label="WhatsApp us for a custom order"
-  >
-    WhatsApp us
-  </a>
+<!-- CART -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
 
-  <!-- Toast -->
-  <div class="toast" id="toast">Added to cart ✅</div>
+<aside class="cart-panel" id="cartPanel">
+  <h2>Your Cart</h2>
+  <div id="cartItems"></div>
 
-  <!-- Cart Overlay -->
-  <div class="cart-overlay hidden" id="cart-overlay">
-    <aside class="cart-panel" role="dialog" aria-label="Shopping cart">
-      <header class="cart-header">
-        <h2>Your Cart</h2>
-        <button class="close-cart" type="button" aria-label="Close cart">×</button>
-      </header>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Subtotal</span>
+      <strong id="cartTotal">R0.00</strong>
+    </div>
 
-      <div class="cart-items" id="cart-items"></div>
+    <button class="btn-checkout" onclick="checkout()">Checkout</button>
 
-      <footer class="cart-footer">
-        <div class="subtotal">
-          <span>Subtotal</span>
-          <strong id="cart-total">R0.00</strong>
-        </div>
+    <a
+      href="https://wa.me/27769126465?text=Hi%20Rozvy%20Estates%2C%20I%27d%20like%20help%20with%20my%20order."
+      class="whatsapp-btn cart-whatsapp"
+      target="_blank"
+    >
+      WhatsApp us instead
+    </a>
 
-        <div class="cart-actions">
-          <button class="btn-checkout" type="button">Checkout</button>
-          <button class="btn-clear" type="button">Clear cart</button>
-        </div>
-
-        <div class="cart-note">
-          Delivery is calculated at checkout.
-        </div>
-
-        <a
-          class="whatsapp-btn whatsapp-btn--cart"
-          href="https://wa.me/27827649996?text=Hi%20Rozvy%20Estates%2C%20I%20need%20help%20with%20my%20order."
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          WhatsApp us instead
-        </a>
-      </footer>
-    </aside>
+    <button class="btn-clear" onclick="clearCart()">Clear cart</button>
   </div>
+</aside>
 
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
