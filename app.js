@@ -1,370 +1,258 @@
-console.log("APP JS LOADED");
-// ✅ IMPORTANT: Your images now live in /assets/ (folder)
-// So each product image uses: "assets/<filename>.jpg"
+// app.js
 
-const CHECKOUT_URL = ""; 
-// Put your payment/checkout URL here (PayFast link / checkout page / WhatsApp order link).
-// Example WhatsApp order link: "https://wa.me/27769126465?text=Hi%20I%20want%20to%20order%20from%20Rozvy%20Estates"
+// If you later add a real payment gateway page, put the URL here.
+// For now, checkout will fall back to WhatsApp with an order summary.
+const CHECKOUT_URL = "";
 
+// WhatsApp number: +27 (82) 764-9996  -> 27827649996 in wa.me format
+const WHATSAPP_NUMBER = "27827649996";
+
+// Products (match your assets exactly)
 const PRODUCTS = [
   {
     id: "goat-meat",
     name: "Goat Meat",
-    pricePerKg: 180, // change if needed
-    unitLabel: "per kg",
+    description: "Fresh goat meat cuts, cleaned and ready.",
+    price: 180,
+    unit: "kg",
     image: "assets/goat-meat.jpg",
-    desc: "Fresh goat meat cuts, cleaned and ready.",
-    type: "weight"
+    qtyOptions: [0.5, 1, 1.5, 2]
   },
   {
     id: "prepared-chicken",
     name: "Prepared Chicken",
-    pricePerKg: 85, // change if needed
-    unitLabel: "per kg",
+    description: "Prepared chicken, cleaned and ready to cook.",
+    price: 85,
+    unit: "kg",
     image: "assets/prepared-chicken.jpg",
-    desc: "Prepared chicken, cleaned and ready to cook.",
-    type: "weight"
+    qtyOptions: [0.5, 1, 1.5, 2]
   },
   {
     id: "free-range-eggs",
     name: "Free Range Eggs",
-    priceEach: 45, // per tray/unit (change if needed)
-    unitLabel: "per unit",
+    description: "Farm fresh free-range eggs.",
+    price: 45,
+    unit: "unit",
     image: "assets/free-range-eggs.jpg",
-    desc: "Farm fresh free-range eggs.",
-    type: "unit"
+    qtyOptions: [1, 2, 3, 4, 5]
   },
   {
     id: "tilapia-fillets",
     name: "Tilapia Fillets",
-    pricePerKg: 120, // change if needed
-    unitLabel: "per kg",
+    description: "Fresh tilapia fillets, clean and ready.",
+    price: 120,
+    unit: "kg",
     image: "assets/tilapia-fillets.jpg",
-    desc: "Fresh tilapia fillets, clean and ready.",
-    type: "weight"
+    qtyOptions: [0.5, 1, 1.5, 2]
   },
   {
     id: "goat-tripe",
     name: "Goat Tripe",
-    pricePerKg: 95, // change if needed
-    unitLabel: "per kg",
+    description: "Cleaned goat tripe (honeycomb/blanket).",
+    price: 95,
+    unit: "kg",
     image: "assets/goat-tripe.jpg",
-    desc: "Cleaned goat tripe (honeycomb/blanket).",
-    type: "weight"
+    qtyOptions: [0.5, 1, 1.5, 2]
   },
   {
     id: "rozvy-raw-honey",
     name: "Rozvy Raw Honey",
-    priceEach: 120, // per jar (change if needed)
-    unitLabel: "per jar",
+    description: "Raw honey in a sealed container.",
+    price: 120,
+    unit: "unit",
     image: "assets/rozvy-raw-honey.jpg",
-    desc: "Raw honey in a sealed container.",
-    type: "unit"
+    qtyOptions: [1, 2, 3, 4]
   },
   {
     id: "tilapia-kariba-breams",
     name: "Tilapia Kariba Breams",
-    pricePerKg: 110, // change if needed
-    unitLabel: "per kg",
+    description: "Whole tilapia (Kariba breams), fresh.",
+    price: 110,
+    unit: "kg",
     image: "assets/tilapia-kariba-breams.jpg",
-    desc: "Whole tilapia (Kariba breams), fresh.",
-    type: "weight"
+    qtyOptions: [0.5, 1, 1.5, 2]
   }
 ];
 
-// Weight options for "supermarket style" kg selector
-const KG_OPTIONS = [
-  { label: "0.5 kg", value: 0.5 },
-  { label: "1 kg", value: 1 },
-  { label: "1.5 kg", value: 1.5 },
-  { label: "2 kg", value: 2 },
-  { label: "3 kg", value: 3 },
-  { label: "5 kg", value: 5 },
-];
+// DOM
+const productListEl = document.getElementById("product-list");
+const cartOverlayEl = document.getElementById("cart-overlay");
+const cartItemsEl = document.getElementById("cart-items");
+const cartCountEl = document.getElementById("cart-count");
+const cartTotalEl = document.getElementById("cart-total");
 
-const els = {
-  grid: document.getElementById("productGrid"),
-  cartCount: document.getElementById("cartCount"),
-  cartDrawer: document.getElementById("cartDrawer"),
-  cartItems: document.getElementById("cartItems"),
-  cartSubtotal: document.getElementById("cartSubtotal"),
-  openCartBtn: document.getElementById("openCartBtn"),
-  closeCartBtn: document.getElementById("closeCartBtn"),
-  drawerBackdrop: document.getElementById("drawerBackdrop"),
-  checkoutBtn: document.getElementById("checkoutBtn"),
-  clearCartBtn: document.getElementById("clearCartBtn"),
-};
+const cartToggleBtn = document.querySelector(".cart-toggle");
+const closeCartBtn = document.querySelector(".close-cart");
+const clearCartBtn = document.querySelector(".btn-clear");
+const checkoutBtn = document.querySelector(".btn-checkout");
 
-let cart = loadCart(); // { key: {productId, qtyOrKg, type, optionLabel} }
+// Cart state
+let cart = JSON.parse(localStorage.getItem("rozvy_cart") || "[]");
 
-function moneyZAR(num) {
-  return `R${num.toFixed(2)}`;
-}
+// Events
+cartToggleBtn.addEventListener("click", () => {
+  cartOverlayEl.classList.remove("hidden");
+});
 
-function productPrice(p, amount) {
-  if (p.type === "weight") return p.pricePerKg * amount;
-  return p.priceEach * amount;
-}
+closeCartBtn.addEventListener("click", () => {
+  cartOverlayEl.classList.add("hidden");
+});
 
-function cartItemKey(productId, optionValue) {
-  return `${productId}::${optionValue ?? "unit"}`;
-}
+// Close cart when clicking outside the panel
+cartOverlayEl.addEventListener("click", (e) => {
+  if (e.target === cartOverlayEl) cartOverlayEl.classList.add("hidden");
+});
 
-function renderProducts() {
-  els.grid.innerHTML = "";
-
-  PRODUCTS.forEach((p) => {
-    const card = document.createElement("article");
-    card.className = "card";
-
-    const left = document.createElement("div");
-    left.className = "thumb";
-    left.innerHTML = `<img src="${p.image}" alt="${p.name}">`;
-
-    const right = document.createElement("div");
-
-    const title = document.createElement("h3");
-    title.className = "card__title";
-    title.textContent = p.name;
-
-    const desc = document.createElement("p");
-    desc.className = "card__desc";
-    desc.textContent = p.desc;
-
-    const price = document.createElement("div");
-    price.className = "price";
-
-    if (p.type === "weight") {
-      price.innerHTML = `<strong>${moneyZAR(p.pricePerKg)}</strong><span>${p.unitLabel}</span>`;
-    } else {
-      price.innerHTML = `<strong>${moneyZAR(p.priceEach)}</strong><span>${p.unitLabel}</span>`;
-    }
-
-    const controls = document.createElement("div");
-    controls.className = "controls";
-
-    if (p.type === "weight") {
-      const select = document.createElement("select");
-      select.className = "select";
-      KG_OPTIONS.forEach(opt => {
-        const o = document.createElement("option");
-        o.value = opt.value;
-        o.textContent = opt.label;
-        select.appendChild(o);
-      });
-
-      const btn = document.createElement("button");
-      btn.className = "btn btn--primary";
-      btn.textContent = "Add to cart";
-      btn.addEventListener("click", () => {
-        const kg = Number(select.value);
-        addToCart(p.id, kg, `${kg} kg`);
-      });
-
-      controls.appendChild(select);
-      controls.appendChild(btn);
-    } else {
-      const qty = document.createElement("input");
-      qty.className = "qty";
-      qty.type = "number";
-      qty.min = "1";
-      qty.value = "1";
-
-      const btn = document.createElement("button");
-      btn.className = "btn btn--primary";
-      btn.textContent = "Add to cart";
-      btn.addEventListener("click", () => {
-        const q = Math.max(1, Number(qty.value || 1));
-        addToCart(p.id, q, `${q} unit`);
-      });
-
-      controls.appendChild(qty);
-      controls.appendChild(btn);
-    }
-
-    right.appendChild(title);
-    right.appendChild(desc);
-    right.appendChild(price);
-    right.appendChild(controls);
-
-    card.appendChild(left);
-    card.appendChild(right);
-    els.grid.appendChild(card);
-  });
-}
-
-function addToCart(productId, amount, label) {
-  const p = PRODUCTS.find(x => x.id === productId);
-  if (!p) return;
-
-  const key = cartItemKey(productId, p.type === "weight" ? amount : "unit");
-
-  if (!cart[key]) {
-    cart[key] = {
-      productId,
-      type: p.type,
-      amount,
-      label: p.type === "weight" ? `${amount} kg` : `Qty: ${amount}`,
-    };
-  } else {
-    // For unit items, increment qty; for weight items keep separate (key includes kg)
-    if (p.type === "unit") {
-      cart[key].amount += amount;
-      cart[key].label = `Qty: ${cart[key].amount}`;
-    }
-  }
-
+clearCartBtn.addEventListener("click", () => {
+  cart = [];
   saveCart();
-  updateCartUI(true);
-}
+  renderCart();
+});
 
-function removeFromCart(key) {
-  delete cart[key];
-  saveCart();
-  updateCartUI(false);
-}
-
-function updateCartUI(openDrawer = false) {
-  const items = Object.entries(cart);
-
-  // Count: total unique lines or total qty (we'll show total lines)
-  els.cartCount.textContent = items.length.toString();
-
-  // Render items
-  els.cartItems.innerHTML = "";
-
-  if (items.length === 0) {
-    els.cartItems.innerHTML = `<p style="color: var(--muted); margin: 8px 0;">Your cart is empty.</p>`;
-    els.cartSubtotal.textContent = moneyZAR(0);
-    if (openDrawer) openCart();
-    return;
-  }
-
-  let subtotal = 0;
-
-  items.forEach(([key, item]) => {
-    const p = PRODUCTS.find(x => x.id === item.productId);
-    if (!p) return;
-
-    const lineTotal = productPrice(p, item.amount);
-    subtotal += lineTotal;
-
-    const row = document.createElement("div");
-    row.className = "cart-item";
-
-    row.innerHTML = `
-      <div class="cart-item__img"><img src="${p.image}" alt="${p.name}"></div>
-      <div>
-        <div class="cart-item__name">${p.name}</div>
-        <div class="cart-item__meta">${item.type === "weight" ? `${moneyZAR(p.pricePerKg)} / kg` : `${moneyZAR(p.priceEach)} each`} • <strong>${moneyZAR(lineTotal)}</strong></div>
-        <div class="cart-item__row">
-          ${
-            item.type === "unit"
-              ? `<input type="number" min="1" value="${item.amount}" data-key="${key}" class="qtyInput" />`
-              : `<span style="color: var(--muted); font-size: 12px;">${item.label}</span>`
-          }
-          <button class="btn btn--danger" data-remove="${key}">Remove</button>
-        </div>
-      </div>
-    `;
-
-    els.cartItems.appendChild(row);
-  });
-
-  els.cartSubtotal.textContent = moneyZAR(subtotal);
-
-  // Wire remove buttons
-  els.cartItems.querySelectorAll("[data-remove]").forEach(btn => {
-    btn.addEventListener("click", () => removeFromCart(btn.getAttribute("data-remove")));
-  });
-
-  // Wire qty inputs (unit items)
-  els.cartItems.querySelectorAll(".qtyInput").forEach(input => {
-    input.addEventListener("change", () => {
-      const key = input.getAttribute("data-key");
-      const val = Math.max(1, Number(input.value || 1));
-      if (cart[key]) {
-        cart[key].amount = val;
-        cart[key].label = `Qty: ${val}`;
-        saveCart();
-        updateCartUI(false);
-      }
-    });
-  });
-
-  if (openDrawer) openCart();
-}
-
-function openCart() {
-  els.cartDrawer.classList.add("is-open");
-  els.cartDrawer.setAttribute("aria-hidden", "false");
-}
-function closeCart() {
-  els.cartDrawer.classList.remove("is-open");
-  els.cartDrawer.setAttribute("aria-hidden", "true");
-}
-
-function buildOrderSummaryText() {
-  const lines = Object.values(cart).map(item => {
-    const p = PRODUCTS.find(x => x.id === item.productId);
-    if (!p) return "";
-    const lineTotal = productPrice(p, item.amount);
-    const qtyText = item.type === "weight" ? `${item.amount} kg` : `Qty ${item.amount}`;
-    return `- ${p.name} (${qtyText}) = ${moneyZAR(lineTotal)}`;
-  }).filter(Boolean);
-
-  const subtotal = Object.values(cart).reduce((sum, item) => {
-    const p = PRODUCTS.find(x => x.id === item.productId);
-    return p ? sum + productPrice(p, item.amount) : sum;
-  }, 0);
-
-  lines.push(`Subtotal: ${moneyZAR(subtotal)}`);
-  return lines.join("\n");
-}
-
-function checkout() {
-  if (Object.keys(cart).length === 0) {
+checkoutBtn.addEventListener("click", () => {
+  if (cart.length === 0) {
     alert("Your cart is empty.");
     return;
   }
 
-  // If you have a checkout URL, send user there with a simple query string
-  if (CHECKOUT_URL && CHECKOUT_URL.trim().length > 0) {
-    const summary = encodeURIComponent(buildOrderSummaryText());
-    const url = `${CHECKOUT_URL}${CHECKOUT_URL.includes("?") ? "&" : "?"}order=${summary}`;
-    window.location.href = url;
+  const orderSummary = buildOrderSummary();
+  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(orderSummary)}`;
+
+  // If no gateway, default to WhatsApp checkout summary (clean UX)
+  if (!CHECKOUT_URL) {
+    window.open(waUrl, "_blank", "noopener,noreferrer");
     return;
   }
 
-  // Fallback: copy order summary so you can paste into WhatsApp/DM manually
-  const summary = buildOrderSummaryText();
-  navigator.clipboard?.writeText(summary).catch(() => {});
-  alert("Checkout link not set yet. Order summary copied to clipboard:\n\n" + summary);
+  // If you later set CHECKOUT_URL, you can redirect there instead
+  window.location.href = CHECKOUT_URL;
+});
+
+// Render products
+function renderProducts() {
+  productListEl.innerHTML = "";
+
+  PRODUCTS.forEach((p) => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+
+    const optionsHTML = p.qtyOptions
+      .map((q) => {
+        const label = p.unit === "kg" ? `${q} kg` : `${q}`;
+        return `<option value="${q}">${label}</option>`;
+      })
+      .join("");
+
+    card.innerHTML = `
+      <img src="${p.image}" alt="${p.name}">
+      <h3>${p.name}</h3>
+      <p>${p.description}</p>
+      <div class="price">R${p.price.toFixed(2)} ${p.unit === "kg" ? "per kg" : "per unit"}</div>
+
+      <div class="product-actions">
+        <select aria-label="Select quantity">${optionsHTML}</select>
+        <button type="button">Add to cart</button>
+      </div>
+    `;
+
+    const qtySelect = card.querySelector("select");
+    const addBtn = card.querySelector("button");
+
+    addBtn.addEventListener("click", () => {
+      const qty = Number(qtySelect.value);
+      addToCart(p, qty);
+    });
+
+    productListEl.appendChild(card);
+  });
 }
 
-function clearCart() {
-  cart = {};
+// Cart logic
+function addToCart(product, qty) {
+  const item = {
+    lineId: `${product.id}-${Date.now()}`,
+    productId: product.id,
+    name: product.name,
+    unit: product.unit,
+    price: product.price,
+    qty,
+    image: product.image
+  };
+
+  cart.push(item);
   saveCart();
-  updateCartUI(false);
+  renderCart();
+}
+
+function removeCartItem(lineId) {
+  cart = cart.filter((i) => i.lineId !== lineId);
+  saveCart();
+  renderCart();
+}
+
+function calcCartTotal() {
+  return cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 }
 
 function saveCart() {
-  localStorage.setItem("rozvy_cart_v1", JSON.stringify(cart));
+  localStorage.setItem("rozvy_cart", JSON.stringify(cart));
 }
-function loadCart() {
-  try {
-    const raw = localStorage.getItem("rozvy_cart_v1");
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
+
+// Render cart
+function renderCart() {
+  cartItemsEl.innerHTML = "";
+
+  if (cart.length === 0) {
+    cartItemsEl.innerHTML = `<p style="color: rgba(229,231,235,0.85); margin:0;">Your cart is empty.</p>`;
+  } else {
+    cart.forEach((item) => {
+      const qtyLabel = item.unit === "kg" ? `${item.qty} kg` : `${item.qty}`;
+      const lineTotal = item.price * item.qty;
+
+      const row = document.createElement("div");
+      row.className = "cart-item";
+
+      row.innerHTML = `
+        <img src="${item.image}" alt="${item.name}">
+        <div class="cart-item-meta">
+          <strong>${item.name}</strong>
+          <div class="line">R${item.price.toFixed(2)} ${item.unit === "kg" ? "/ kg" : ""} • ${qtyLabel}</div>
+          <div class="line-total">R${lineTotal.toFixed(2)}</div>
+        </div>
+        <button class="btn-remove" type="button">Remove</button>
+      `;
+
+      row.querySelector(".btn-remove").addEventListener("click", () => {
+        removeCartItem(item.lineId);
+      });
+
+      cartItemsEl.appendChild(row);
+    });
   }
+
+  cartCountEl.textContent = cart.length;
+  cartTotalEl.textContent = `R${calcCartTotal().toFixed(2)}`;
 }
 
-els.openCartBtn.addEventListener("click", () => openCart());
-els.closeCartBtn.addEventListener("click", () => closeCart());
-els.drawerBackdrop.addEventListener("click", () => closeCart());
-els.checkoutBtn.addEventListener("click", () => checkout());
-els.clearCartBtn.addEventListener("click", () => clearCart());
+// WhatsApp order summary
+function buildOrderSummary() {
+  const lines = cart.map((item) => {
+    const qtyLabel = item.unit === "kg" ? `${item.qty} kg` : `${item.qty}`;
+    const lineTotal = item.price * item.qty;
+    return `- ${item.name} (${qtyLabel}) = R${lineTotal.toFixed(2)}`;
+  });
 
-renderProducts();
-updateCartUI(false);
+  const total = calcCartTotal();
+
+  return `Hi Rozvy Estates, I'd like to place an order:%0A%0A${lines.join(
+    "%0A"
+  )}%0A%0ASubtotal: R${total.toFixed(2)}%0A%0APlease confirm availability and delivery.`
+    // We build a URL-safe string later too, but this keeps it consistent.
+    .replace(/%0A/g, "\n");
+}
+
+// Init
+document.addEventListener("DOMContentLoaded", () => {
+  renderProducts();
+  renderCart();
+});
