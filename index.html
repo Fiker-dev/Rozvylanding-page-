@@ -8,52 +8,80 @@
 </head>
 
 <body>
+  <header class="site-header">
+    <div class="logo-wrap">
+      <img src="assets/rozvy-logo.png" alt="Rozvy Estates" class="site-logo" />
+      <div class="brand-text">
+        <div class="brand-name">Rozvy Estates</div>
+        <div class="tagline">Farm Fresh • Direct to You</div>
+      </div>
+    </div>
 
-<header class="site-header">
-  <div class="logo-wrap">
-    <img src="assets/rozvy-logo.png" alt="Rozvy Estates" class="site-logo" />
-    <span class="tagline">Farm Fresh • Direct to You</span>
+    <div class="header-actions">
+      <!-- WhatsApp custom order button -->
+      <a
+        class="whatsapp-btn"
+        href="https://wa.me/27827649996?text=Hi%20Rozvy%20Estates%2C%20I%27d%20like%20to%20place%20a%20custom%20order."
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        WhatsApp us for a custom order
+      </a>
+
+      <button class="cart-toggle" type="button" aria-label="Open cart">
+        Cart <span id="cart-count">0</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Order Fresh From the Farm</h1>
+    <p>Select quantities, add to cart, then checkout.</p>
+    <div class="tip">
+      Tip: Use the kg selector for meat/fish. Eggs & honey are sold per unit.
+    </div>
+  </section>
+
+  <main class="products" id="product-list"></main>
+
+  <!-- Cart Overlay -->
+  <div class="cart-overlay hidden" id="cart-overlay">
+    <aside class="cart-panel" role="dialog" aria-label="Shopping cart">
+      <header class="cart-header">
+        <h2>Your Cart</h2>
+        <button class="close-cart" type="button" aria-label="Close cart">×</button>
+      </header>
+
+      <div class="cart-items" id="cart-items"></div>
+
+      <footer class="cart-footer">
+        <div class="subtotal">
+          <span>Subtotal</span>
+          <strong id="cart-total">R0.00</strong>
+        </div>
+
+        <div class="cart-actions">
+          <button class="btn-checkout" type="button">Checkout</button>
+          <button class="btn-clear" type="button">Clear cart</button>
+        </div>
+
+        <!-- WhatsApp help inside cart -->
+        <a
+          class="whatsapp-btn whatsapp-btn--cart"
+          href="https://wa.me/27827649996?text=Hi%20Rozvy%20Estates%2C%20I%20need%20help%20with%20my%20order."
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          WhatsApp us instead
+        </a>
+
+        <div class="cart-note">
+          Delivery is calculated at checkout.
+        </div>
+      </footer>
+    </aside>
   </div>
 
-  <button class="cart-toggle">
-    Cart <span id="cart-count">0</span>
-  </button>
-</header>
-
-<section class="hero">
-  <h1>Order Fresh From the Farm</h1>
-  <p>Select quantities, add to cart, then checkout.</p>
-  <div class="tip">
-    Tip: Use the kg selector for meat/fish. Eggs & honey are sold per unit.
-  </div>
-</section>
-
-<main class="products" id="product-list"></main>
-
-<!-- Cart Overlay -->
-<div class="cart-overlay hidden">
-  <aside class="cart-panel">
-    <header class="cart-header">
-      <h2>Your Cart</h2>
-      <button class="close-cart">×</button>
-    </header>
-
-    <div class="cart-items" id="cart-items"></div>
-
-    <footer class="cart-footer">
-      <div class="subtotal">
-        <span>Subtotal</span>
-        <strong id="cart-total">R0.00</strong>
-      </div>
-
-      <div class="cart-actions">
-        <button class="btn-checkout">Checkout</button>
-        <button class="btn-clear">Clear cart</button>
-      </div>
-    </footer>
-  </aside>
-</div>
-
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
