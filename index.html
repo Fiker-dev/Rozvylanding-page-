@@ -1,79 +1,59 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rozvy Estates • Farm Fresh Checkout</title>
+  <title>Rozvy Estates | Order Fresh From the Farm</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
-  <header class="topbar">
-    <div class="wrap topbar__inner">
-      <div class="brand">
-        <div class="brand__logo">Rozvy</div>
-        <div class="brand__meta">
-          <div class="brand__title">Rozvy Estates</div>
-          <div class="brand__sub">Farm Fresh • Direct to You</div>
-        </div>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="assets/rozvy-logo.png" alt="Rozvy Estates" class="site-logo" />
+    <span class="tagline">Farm Fresh • Direct to You</span>
+  </div>
+
+  <button class="cart-toggle">
+    Cart <span id="cart-count">0</span>
+  </button>
+</header>
+
+<section class="hero">
+  <h1>Order Fresh From the Farm</h1>
+  <p>Select quantities, add to cart, then checkout.</p>
+  <div class="tip">
+    Tip: Use the kg selector for meat/fish. Eggs & honey are sold per unit.
+  </div>
+</section>
+
+<main class="products" id="product-list"></main>
+
+<!-- Cart Overlay -->
+<div class="cart-overlay hidden">
+  <aside class="cart-panel">
+    <header class="cart-header">
+      <h2>Your Cart</h2>
+      <button class="close-cart">×</button>
+    </header>
+
+    <div class="cart-items" id="cart-items"></div>
+
+    <footer class="cart-footer">
+      <div class="subtotal">
+        <span>Subtotal</span>
+        <strong id="cart-total">R0.00</strong>
       </div>
 
-      <button class="cart-btn" id="openCartBtn" aria-label="Open cart">
-        Cart <span class="cart-count" id="cartCount">0</span>
-      </button>
-    </div>
-  </header>
-
-  <main class="wrap">
-    <section class="hero">
-      <h1>Order Fresh From the Farm</h1>
-      <p>Select quantities, add to cart, then checkout.</p>
-      <div class="note">
-        Tip: Use the kg selector for meat/fish. Eggs & honey are sold per unit.
+      <div class="cart-actions">
+        <button class="btn-checkout">Checkout</button>
+        <button class="btn-clear">Clear cart</button>
       </div>
-    </section>
-
-    <section class="grid" id="productGrid"></section>
-  </main>
-
-  <!-- Cart Drawer -->
-  <aside class="drawer" id="cartDrawer" aria-hidden="true">
-    <div class="drawer__panel">
-      <div class="drawer__header">
-        <h2>Your Cart</h2>
-        <button class="icon-btn" id="closeCartBtn" aria-label="Close cart">✕</button>
-      </div>
-
-      <div class="drawer__body" id="cartItems"></div>
-
-      <div class="drawer__footer">
-        <div class="totals">
-          <div class="totals__row">
-            <span>Subtotal</span>
-            <strong id="cartSubtotal">R0.00</strong>
-          </div>
-          <div class="totals__row totals__row--small">
-            <span>Delivery</span>
-            <span>Calculated at checkout</span>
-          </div>
-        </div>
-
-        <button class="btn btn--primary" id="checkoutBtn">
-          Checkout
-        </button>
-
-        <button class="btn btn--ghost" id="clearCartBtn">
-          Clear cart
-        </button>
-
-        <p class="tiny">
-          If checkout link is not set yet, update <code>CHECKOUT_URL</code> in <code>app.js</code>.
-        </p>
-      </div>
-    </div>
-
-    <div class="drawer__backdrop" id="drawerBackdrop"></div>
+    </footer>
   </aside>
+</div>
 
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
