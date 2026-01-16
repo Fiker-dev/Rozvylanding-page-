@@ -8,6 +8,7 @@
 </head>
 
 <body>
+  <!-- Clean header (less congested on mobile) -->
   <header class="site-header">
     <div class="logo-wrap">
       <img src="assets/rozvy-logo.png" alt="Rozvy Estates" class="site-logo" />
@@ -18,16 +19,6 @@
     </div>
 
     <div class="header-actions">
-      <!-- WhatsApp custom order button -->
-      <a
-        class="whatsapp-btn"
-        href="https://wa.me/27827649996?text=Hi%20Rozvy%20Estates%2C%20I%27d%20like%20to%20place%20a%20custom%20order."
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        WhatsApp us for a custom order
-      </a>
-
       <button class="cart-toggle" type="button" aria-label="Open cart">
         Cart <span id="cart-count">0</span>
       </button>
@@ -43,6 +34,20 @@
   </section>
 
   <main class="products" id="product-list"></main>
+
+  <!-- Floating WhatsApp (better mobile UX) -->
+  <a
+    class="wa-float"
+    href="https://wa.me/27827649996?text=Hi%20Rozvy%20Estates%2C%20I%27d%20like%20to%20place%20a%20custom%20order."
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="WhatsApp us for a custom order"
+  >
+    WhatsApp us
+  </a>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">Added to cart ✅</div>
 
   <!-- Cart Overlay -->
   <div class="cart-overlay hidden" id="cart-overlay">
@@ -65,7 +70,10 @@
           <button class="btn-clear" type="button">Clear cart</button>
         </div>
 
-        <!-- WhatsApp help inside cart -->
+        <div class="cart-note">
+          Delivery is calculated at checkout.
+        </div>
+
         <a
           class="whatsapp-btn whatsapp-btn--cart"
           href="https://wa.me/27827649996?text=Hi%20Rozvy%20Estates%2C%20I%20need%20help%20with%20my%20order."
@@ -74,10 +82,6 @@
         >
           WhatsApp us instead
         </a>
-
-        <div class="cart-note">
-          Delivery is calculated at checkout.
-        </div>
       </footer>
     </aside>
   </div>
