@@ -1,13 +1,9 @@
 // app.js
-
-// If you later add a real payment gateway page, put the URL here.
-// For now, checkout will fall back to WhatsApp with an order summary.
+// Checkout: if no gateway URL yet, we send the order to WhatsApp as checkout fallback.
 const CHECKOUT_URL = "";
-
-// WhatsApp number: +27 (82) 764-9996  -> 27827649996 in wa.me format
 const WHATSAPP_NUMBER = "27827649996";
 
-// Products (match your assets exactly)
+// Products
 const PRODUCTS = [
   {
     id: "goat-meat",
@@ -80,16 +76,27 @@ const cartOverlayEl = document.getElementById("cart-overlay");
 const cartItemsEl = document.getElementById("cart-items");
 const cartCountEl = document.getElementById("cart-count");
 const cartTotalEl = document.getElementById("cart-total");
+const toastEl = document.getElementById("toast");
 
 const cartToggleBtn = document.querySelector(".cart-toggle");
 const closeCartBtn = document.querySelector(".close-cart");
 const clearCartBtn = document.querySelector(".btn-clear");
 const checkoutBtn = document.querySelector(".btn-checkout");
 
-// Cart state
+// Cart
 let cart = JSON.parse(localStorage.getItem("rozvy_cart") || "[]");
 
-// Events
+// ---------- Helpers ----------
+function money(n){ return `R${Number(n).toFixed(2)}`; }
+
+function showToast(msg="Added to cart ✅"){
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  window.clearTimeout(showToast._t);
+  showToast._t = window.setTimeout(()=> toastEl.classList.remove("show"), 1200);
+}
+
+// ---------- Events ----------
 cartToggleBtn.addEventListener("click", () => {
   cartOverlayEl.classList.remove("hidden");
 });
@@ -98,7 +105,6 @@ closeCartBtn.addEventListener("click", () => {
   cartOverlayEl.classList.add("hidden");
 });
 
-// Close cart when clicking outside the panel
 cartOverlayEl.addEventListener("click", (e) => {
   if (e.target === cartOverlayEl) cartOverlayEl.classList.add("hidden");
 });
@@ -107,6 +113,7 @@ clearCartBtn.addEventListener("click", () => {
   cart = [];
   saveCart();
   renderCart();
+  showToast("Cart cleared");
 });
 
 checkoutBtn.addEventListener("click", () => {
@@ -115,60 +122,83 @@ checkoutBtn.addEventListener("click", () => {
     return;
   }
 
-  const orderSummary = buildOrderSummary();
-  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(orderSummary)}`;
+  const summary = buildOrderSummary();
+  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(summary)}`;
 
-  // If no gateway, default to WhatsApp checkout summary (clean UX)
   if (!CHECKOUT_URL) {
     window.open(waUrl, "_blank", "noopener,noreferrer");
     return;
   }
 
-  // If you later set CHECKOUT_URL, you can redirect there instead
   window.location.href = CHECKOUT_URL;
 });
 
-// Render products
-function renderProducts() {
+// ---------- Products ----------
+function renderProducts(){
   productListEl.innerHTML = "";
 
   PRODUCTS.forEach((p) => {
     const card = document.createElement("div");
     card.className = "product-card";
 
-    const optionsHTML = p.qtyOptions
-      .map((q) => {
-        const label = p.unit === "kg" ? `${q} kg` : `${q}`;
-        return `<option value="${q}">${label}</option>`;
-      })
-      .join("");
+    const optionsHTML = p.qtyOptions.map((q) => {
+      const label = p.unit === "kg" ? `${q} kg` : `${q}`;
+      return `<option value="${q}">${label}</option>`;
+    }).join("");
 
     card.innerHTML = `
       <img src="${p.image}" alt="${p.name}">
       <h3>${p.name}</h3>
       <p>${p.description}</p>
-      <div class="price">R${p.price.toFixed(2)} ${p.unit === "kg" ? "per kg" : "per unit"}</div>
+      <div class="price">${money(p.price)} ${p.unit === "kg" ? "per kg" : "per unit"}</div>
 
       <div class="product-actions">
         <select aria-label="Select quantity">${optionsHTML}</select>
-        <button type="button">Add to cart</button>
+        <button type="button" class="add-btn">Add to cart</button>
       </div>
     `;
 
     const qtySelect = card.querySelector("select");
-    const addBtn = card.querySelector("button");
+    const addBtn = card.querySelector(".add-btn");
 
     addBtn.addEventListener("click", () => {
       const qty = Number(qtySelect.value);
       addToCart(p, qty);
+
+      // Button micro-animation
+      addBtn.textContent = "Added ✅";
+      addBtn.style.filter = "brightness(1.05)";
+      setTimeout(() => {
+        addBtn.textContent = "Add to cart";
+        addBtn.style.filter = "none";
+      }, 850);
+
+      showToast(`${p.name} added ✅`);
     });
 
     productListEl.appendChild(card);
   });
+
+  // Animate cards in-view
+  setupCardAnimations();
 }
 
-// Cart logic
-function addToCart(product, qty) {
+function setupCardAnimations(){
+  const cards = document.querySelectorAll(".product-card");
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting){
+        entry.target.classList.add("in-view");
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  cards.forEach(c => io.observe(c));
+}
+
+// ---------- Cart ----------
+function addToCart(product, qty){
   const item = {
     lineId: `${product.id}-${Date.now()}`,
     productId: product.id,
@@ -184,25 +214,24 @@ function addToCart(product, qty) {
   renderCart();
 }
 
-function removeCartItem(lineId) {
-  cart = cart.filter((i) => i.lineId !== lineId);
+function removeCartItem(lineId){
+  cart = cart.filter(i => i.lineId !== lineId);
   saveCart();
   renderCart();
 }
 
-function calcCartTotal() {
-  return cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+function calcCartTotal(){
+  return cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
 }
 
-function saveCart() {
+function saveCart(){
   localStorage.setItem("rozvy_cart", JSON.stringify(cart));
 }
 
-// Render cart
-function renderCart() {
+function renderCart(){
   cartItemsEl.innerHTML = "";
 
-  if (cart.length === 0) {
+  if (cart.length === 0){
     cartItemsEl.innerHTML = `<p style="color: rgba(229,231,235,0.85); margin:0;">Your cart is empty.</p>`;
   } else {
     cart.forEach((item) => {
@@ -211,19 +240,19 @@ function renderCart() {
 
       const row = document.createElement("div");
       row.className = "cart-item";
-
       row.innerHTML = `
         <img src="${item.image}" alt="${item.name}">
         <div class="cart-item-meta">
           <strong>${item.name}</strong>
-          <div class="line">R${item.price.toFixed(2)} ${item.unit === "kg" ? "/ kg" : ""} • ${qtyLabel}</div>
-          <div class="line-total">R${lineTotal.toFixed(2)}</div>
+          <div class="line">${money(item.price)} ${item.unit === "kg" ? "/ kg" : ""} • ${qtyLabel}</div>
+          <div class="line-total">${money(lineTotal)}</div>
         </div>
         <button class="btn-remove" type="button">Remove</button>
       `;
 
       row.querySelector(".btn-remove").addEventListener("click", () => {
         removeCartItem(item.lineId);
+        showToast("Removed");
       });
 
       cartItemsEl.appendChild(row);
@@ -231,27 +260,20 @@ function renderCart() {
   }
 
   cartCountEl.textContent = cart.length;
-  cartTotalEl.textContent = `R${calcCartTotal().toFixed(2)}`;
+  cartTotalEl.textContent = money(calcCartTotal());
 }
 
-// WhatsApp order summary
-function buildOrderSummary() {
+function buildOrderSummary(){
   const lines = cart.map((item) => {
     const qtyLabel = item.unit === "kg" ? `${item.qty} kg` : `${item.qty}`;
     const lineTotal = item.price * item.qty;
-    return `- ${item.name} (${qtyLabel}) = R${lineTotal.toFixed(2)}`;
+    return `- ${item.name} (${qtyLabel}) = ${money(lineTotal)}`;
   });
 
-  const total = calcCartTotal();
-
-  return `Hi Rozvy Estates, I'd like to place an order:%0A%0A${lines.join(
-    "%0A"
-  )}%0A%0ASubtotal: R${total.toFixed(2)}%0A%0APlease confirm availability and delivery.`
-    // We build a URL-safe string later too, but this keeps it consistent.
-    .replace(/%0A/g, "\n");
+  return `Hi Rozvy Estates, I'd like to place an order:\n\n${lines.join("\n")}\n\nSubtotal: ${money(calcCartTotal())}\n\nPlease confirm availability and delivery.`;
 }
 
-// Init
+// ---------- Init ----------
 document.addEventListener("DOMContentLoaded", () => {
   renderProducts();
   renderCart();
